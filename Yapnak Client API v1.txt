@@ -1,0 +1,23 @@
+Client API
+
+All API returns will have  fields <status:string> and <message:string>.  If status equals "True" then API has been successful.  Else, message will contain details of the problem.  If an API is said to return 'none' then it means 'just status and message'.
+
+Root url (for http requests): https://yapnak-app.appspot.com/_ah/api/clientEndpointApi/v1
+
+Root Entity (for android studio): ClientEndpoint
+
+/authenticateClient   : POST <email:String> <password:String>
+
+Returns: <clientId:int>
+
+Will fail if client details are incorrect.
+
+/qrRedeem   : POST <userId:String> <clientId:int> <offerId:int> <rewardRedeemed:String>
+
+rewardRedeemed is at the moment in the form of "BRONZE", "SILVER" or "GOLD".  Pass this string as it is sent.
+
+Returns: <loyaltyPoints:int> <recommend:int (0 = not recommended, 1 = user recommended by another user)> <offerText:String (the offer being redeemed)> <loyaltyRedeemedLevel:String (BRONZE,SILVER or GOLD if it was redeemed in this transaction)>
+
+Will return false is an offerId doesn't exist, if that offerId does not belong to the client scanning the code, if the qr code purports to redeem a reward level that has already been claim, if the userId is not in the system or something goes wrong on the backend.
+
+Message will contain 'new customer bonus' if it is the user's first time redeeming in a client.

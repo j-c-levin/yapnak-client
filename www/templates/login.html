@@ -1,0 +1,24 @@
+<ion-view>
+
+   <ion-content class="login-content">
+    <form name="authorizationForm" novalidate="" >
+		<div class="logo-content" >
+			<img src="img/logo.png" alt="" />
+		</div>
+
+      <div class="list">
+
+        <label class="item item-input" >
+          <input type="email" placeholder="Email"  ng-model="loginData.email">
+        </label>
+        <label class="item item-input" >
+          <input type="password" placeholder="Password" ng-model="loginData.password">
+        </label>
+
+          <button class="button button-block button-positive" ng-click="login()" type="submit">Log in</button>
+
+      </div>
+    </form>
+
+  </ion-content>
+</ion-view>

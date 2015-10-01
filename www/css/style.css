@@ -1,0 +1,70 @@
+/* Empty. Add your own CSS if you like */
+
+/*******Login template***********/
+.logo-content
+{
+	text-align:center;
+	margin-bottom: 10%;
+}
+
+.login-content
+{
+	top:10%;
+}
+.logo-content img
+{
+	max-width:135px;
+	height:auto;
+}
+.login-content .list
+{
+	padding: 0 20px;
+}
+/*.login-content .item
+{
+	background:transparent !important;
+	border-color:#fff;
+	border-width: 0px 0px 1px 0px;
+}
+.login-content .item p, input
+{
+	color:#fff !important;
+}*/
+/*.login-content .item input::-webkit-input-placeholder {color: #fff;}
+.login-content .item input:-moz-placeholder {color: #fff;}
+.login-content .item input::-moz-placeholder {color: #fff;}
+.login-content .item input:-ms-input-placeholder {color: #fff;}*/
+
+.login-content .item p.alertText
+{
+	font-size:12px !important;
+	text-align: right;
+    min-width: 75px;
+	color:red;
+}
+.login-content .button-positive
+{
+	margin-top: 50px;
+	background:#ed1c24 !important;
+	border-color: #CE1C22;
+}
+   /*****End of login ********/
+   
+   .pane, .view{
+	   background-color: #EEEEEE !important;
+   }
+   
+   .bar.bar-stable{
+	        background: #ed1c24 !important;
+     border-color: #CE1C22 !important;
+	 color:white !important;
+   }
+   .bar-stable .button.button-clear{
+	   color: white!important;
+   }
+   .bar.bar-stable .title{
+	    color: white!important;
+   }
+   .text-algn{
+	   text-align: right;
+   }

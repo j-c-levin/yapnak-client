@@ -1,0 +1,36 @@
+<ion-view view-title="QRScanner">
+  <ion-content>
+       <button type="button" class="button button-block button-calm" ng-click="reScan()" >Re-Scan</button>
+   <div style="text-align: center;"><h1>{{scanText | uppercase}}</h1></div>
+   <div ng-show="valid">
+    <div class="row">
+      <div class="col col-40 text-algn"><b>Loyalty Points:</b></div>
+      <div class="col col-60"><b>{{rewards.loyaltyPoints}}</b></div>
+    </div>
+   <div class="row">
+      <div class="col col-40 text-algn"><b>Loyalty Redeemed Level:</b></div>
+       <div class="col col-60"><b>{{rewards.loyaltyRedeemedLevel}}</b></div>
+    </div>
+     <div class="row">
+      <div class="col col-40 text-algn"><b>Offer:</b></div>
+       <div class="col col-60"><b>{{rewards.offerText}}</b></div>
+    </div>
+     <div class="row">
+      <div class="col col-40 text-algn"><b>Recommended:</b></div>
+       <div class="col col-60"><b>{{rewards.recommended==0?'No':'Yes'}}</b></div>
+    </div>
+     <div class="row">
+      <div class="col col-40 text-algn"><b>Client Name:</b></div>
+       <div class="col col-60"><b>{{rewards.client}}</b></div>
+    </div>
+ </div>
+ <div ng-show="invalid">
+    <div style="text-align: center;"><h2>NOT VERIFIED</h2></div>
+    <div class="row">
+      <div class="col col-40 text-algn"><h3>{{rewards.client== undefined?"":'CLIENT NAME:'}}</h3></div>
+       <div class="col col-60"><h3>{{rewards.client}}</h3></div>
+    </div>
+      <div style="text-align: center;"><h2>N/A</h2></div>
+ </div>
+   </ion-content>
+</ion-view>
