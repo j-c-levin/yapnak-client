@@ -3,6 +3,11 @@ var qrScanner = angular.module('controllers', []);
 qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,QRService, localstorage, webfactory, $ionicLoading) {
 
   $scope.loginData = {};
+  console.log(localstorage.get("clientId"));
+  if (localstorage.get("clientId") !== undefined && localstorage.get("clientId") !== "") {
+    //Login
+    $state.go("app.QRScanner");
+  }
 
   $scope.login = function() {
     console.log($scope.loginData);
@@ -54,7 +59,8 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
 
   function scanBarcode() {
     $cordovaBarcodeScanner.scan().then(function(imageData) {
-      alert('Found a QR code: ' + imageData.text);
+      console.log(imageData);
+      if (imageData.cancelled == "true") {
       try{
         console.log("Scan completed");
         console.log(imageData);
@@ -64,6 +70,9 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
         popup("An error happened -> " + e);
         console.log("An error happened -> " + e);
       }
+    } else {
+      console.log("cancelled");
+    }
     }, function(error) {
       console.log("A real huge error occured -> " + error);
       popup("A real huge error occured -> " + error);
@@ -71,7 +80,6 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
   };
 
   function checkQr(qrCode) {
-    alert('checking the qr code');
     try {
       var object = JSON.parse(qrCode);
     } catch (e) {
@@ -81,11 +89,9 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
     //Need to check if ios or android here
     if (object.hash === "") {
       console.log("android");
-      alert('Found an android code');
       androidQr(object);
     } else {
       console.log("iOS");
-      alert('Found an iOS code');
       iosQr(object);
     }
   }
@@ -229,7 +235,6 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
       popup('QR code error');
     }
   }
-
 
   function popup(title){
     var alertpop=$ionicPopup.alert({
