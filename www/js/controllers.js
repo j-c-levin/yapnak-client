@@ -43,14 +43,14 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
 
 });
 
-qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $cordovaBarcodeScanner,QRService,$ionicPopup,$timeout,md5, webfactory, localstorage) {
-  $scope.rewards=[];
+qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $cordovaBarcodeScanner,QRService,$ionicPopup,$timeout,md5, webfactory, localstorage, $ionicLoading) {
+  $scope.rewards={};
   $scope.scanText='';
-  $scope.valid=false;
-  $scope.invalid=false;
+
   $ionicPlatform.ready(function() {
     scanBarcode();
   });
+
   $scope.reScan=function(){
     $ionicPlatform.ready(function() {
       scanBarcode();
@@ -60,19 +60,18 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
   function scanBarcode() {
     $cordovaBarcodeScanner.scan().then(function(imageData) {
       console.log(imageData);
-      if (imageData.cancelled == "true") {
-      try{
-        console.log("Scan completed");
-        console.log(imageData);
-        checkQr(imageData.text);
-      }catch(e)
-      {
-        popup("An error happened -> " + e);
-        console.log("An error happened -> " + e);
+      if (imageData.cancelled == false) {
+        try {
+          console.log("Scan completed");
+          console.log(imageData);
+          checkQr(imageData.text);
+        } catch(e) {
+          popup("An error happened -> " + e);
+          console.log("An error happened -> " + e);
+        }
+      } else {
+        console.log("cancelled");
       }
-    } else {
-      console.log("cancelled");
-    }
     }, function(error) {
       console.log("A real huge error occured -> " + error);
       popup("A real huge error occured -> " + error);
@@ -98,10 +97,18 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
 
   function iosQr(object) {
     var id = object.id;
-    var timestamp = new Date(object.datetime).getTime() / 1000;
-    var offer = object.offer;
-    console.log(id);
+    var timestamp = object.datetime;
+    timestamp = timestamp.split("");
+    timestamp.splice(12,0,":");
+    timestamp.splice(10,0,":");
+    timestamp.splice(8,0,"T");
+    timestamp.splice(6,0,"-");
+    timestamp.splice(4,0,"-");
+    timestamp = timestamp.join("");
+    timestamp = new Date(timestamp).getTime() / 1000;
+    console.log("timestamp");
     console.log(timestamp);
+    var offer = object.offer;
 
     //Check datetime
     var currentTime = Math.floor(Date.now() / 1000);
@@ -118,25 +125,7 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
 
       //Check hash in future
 
-      //Redeem claim
-      webfactory.redeemClaim(id,localstorage.get("clientId"),offer).then(function(response){
-        if (response.status === "True") {
-          $ionicPopup.alert({
-            title: 'Offer claimed',
-            template: 'Claimed offer: ' + response.offerText
-          });
-        } else {
-          $ionicPopup.alert({
-            title: 'Something went wrong',
-            template: response.message
-          });
-        };
-      },function(error){
-        $ionicPopup.alert({
-          title: 'Something went wrong',
-          template: 'We were unable to log the information online, but the user and their code is valid.'
-        });
-      });
+      redeemClaim(id,localstorage.get("clientId"),offer);
     }
   }
 
@@ -161,94 +150,45 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
       //Check hash in future
 
       //Redeem claim
-      webfactory.redeemClaim(id[0],localstorage.get("clientId"),offer[0]).then(function(response){
-        if (response.status === "True") {
-          $ionicPopup.alert({
-            title: 'Offer claimed',
-            template: 'Claimed offer: ' + response.offerText
-          });
-        } else {
+      redeemClaim(id[0],localstorage.get("clientId"),offer[0]);
+    }
+  }
+
+  function redeemClaim(userId,clientId,offerId) {
+    $ionicLoading.show({
+      template: 'Redeeming...'
+    });
+    webfactory.redeemClaim(userId,clientId,offerId).then(function(response){
+      $ionicLoading.hide();
+      if (response.status === "True") {
+        $ionicPopup.alert({
+          title: 'Offer claimed',
+          template: 'Claimed offer: ' + response.offerText
+        });
+        $scope.rewards.loyaltyRedeemedLevel = "None";
+        $scope.rewards.loyaltyPoints = response.loyaltyPoints;
+        $scope.rewards.offerText = response.offerText;
+        $scope.rewards.recommended = response.recommended;
+      } else {
+        if (response.message !== undefined) {
           $ionicPopup.alert({
             title: 'Something went wrong',
             template: response.message
           });
-        };
-      },function(error){
-        $ionicPopup.alert({
-          title: 'Something went wrong',
-          template: 'We were unable to log the information online, but the user and their code is valid.'
-        });
+        } else {
+          $ionicPopup.alert({
+            title: 'Something went wrong',
+            template: 'Probably an internet connection error.'
+          });
+        }
+      };
+    },function(error){
+      $ionicLoading.hide();
+      $ionicPopup.alert({
+        title: 'Something went wrong',
+        template: 'We were unable to log the information online, but the user and their code is valid.'
       });
-    }
-  }
-
-  function validate(imageData){
-
-    // imageData=[{"id":"Jame1186","isReward":"false","client":"27","offer":"217","datetime":"20150926101056","hash":"2CBA6BBD3AA3AC7D55D10ED5AB3CEF08"}];
-    if(imageData != undefined ){
-      imageData.rewardRedeemed="True";
-
-      var numbers =  imageData.datetime.replace(/-/g, "").replace(/\(/g, "").replace(/\) /g, "");
-      var matches =  numbers.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-      var QRDate=matches[2]+'/'+matches[3]+'/'+matches[1];
-      var QRTime=eval((matches[4] >12?matches[4]-12:matches[4] )*60*60+matches[5]*60+matches[6]*1) ;
-      var QRDateTime=$filter('date')(matches[2]+'/'+matches[3]+'/'+matches[1]+" "+matches[4]+':'+matches[5]+':'+matches[6] ,'MM/dd/yyyy hh:mm:ss');
-      var currentDate= $filter('date')(new Date(),'MM/dd/yyyy');
-      var currentTime= ($filter('date')(new Date(),'hh:mm:ss')).split(':');
-      var currentTimeSeconds=eval(currentTime[0]*60*60+currentTime[1]*60+currentTime[2]*1);
-      var timediff=currentTimeSeconds-QRTime ;
-
-
-
-
-      if((QRDate+1 === currentDate)&& (timediff<= 15*60 ) && timediff>0 )
-      {
-        if( imageData.hash.length >0 &&  imageData.hash !== undefined ){
-          QRService.QRValidate(imageData).then(function(responce){
-            if(responce.status===200){
-              if(responce.data.status=='True'){
-                $scope.valid=true;
-                $scope.invalid=false;
-                $scope.rewards=responce.data;
-                $scope.rewards.client=imageData.id;
-                $scope.scanText='Scan Results';
-
-              }
-              else{
-                popup("Offer doesn't exist");
-              }
-            }
-            else{
-              popup("System error");
-            }
-          })
-        }
-        else{
-          popup('Invalid QR Code');
-        }
-      }
-      else{
-        popup('QR code Expire after 15 minutes,Please generate new one');
-      }
-    }
-    else{
-      popup('QR code error');
-    }
-  }
-
-  function popup(title){
-    var alertpop=$ionicPopup.alert({
-      title:title
-
     });
-
-    // $timeout(function() {
-    //      alertpop.close(); //close the popup after 3 seconds for some reason
-    //   }, 2500);
-
-    $scope.scanText=title;
-    $scope.valid=false;
-    $scope.invalid=true;
   }
 
 });
