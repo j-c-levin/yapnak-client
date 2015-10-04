@@ -1,6 +1,6 @@
 var qrScanner = angular.module('controllers', []);
 
-qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,QRService, localstorage, webfactory, $ionicLoading) {
+qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,QRService, localstorage, webfactory, $ionicLoading, $ionicHistory) {
 
   $scope.loginData = {};
   console.log(localstorage.get("clientId"));
@@ -24,18 +24,21 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
         $ionicLoading.hide();
         if (response.status === "True") {
           localstorage.set("clientId",response.clientId);
+          $ionicHistory.nextViewOptions({
+              disableBack: true
+          });
           $state.go("app.QRScanner");
         } else {
           $ionicPopup.alert({
-            title: 'Login failed',
-            template: 'Something went wrong: ' + response.message
+            title: 'Something went wrong',
+            template: 'We\'re not quite sure what, but could you check your internet is on?'
           });
         }
       }, function(error) {
         $ionicLoading.hide();
         $ionicPopup.alert({
-          title: 'Login failed',
-          template: 'Something went wrong: ' + response
+          title: 'Something went wrong',
+          template: 'We\'re not quite sure what, but could you check your internet is on?'
         });
       });
     }
@@ -44,14 +47,14 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
 });
 
 qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $cordovaBarcodeScanner,QRService,$ionicPopup,$timeout,md5, webfactory, localstorage, $ionicLoading) {
-  $scope.rewards={};
-  $scope.scanText='';
+  $scope.reward = {};
+  $scope.scanText = '';
 
   $ionicPlatform.ready(function() {
     scanBarcode();
   });
 
-  $scope.reScan=function(){
+  $scope.reScan = function(){
     $ionicPlatform.ready(function() {
       scanBarcode();
     });
@@ -159,6 +162,7 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
       template: 'Redeeming...'
     });
     webfactory.redeemClaim(userId,clientId,offerId).then(function(response){
+      $scope.rewards = {};
       $ionicLoading.hide();
       if (response.status === "True") {
         $ionicPopup.alert({
