@@ -4,9 +4,22 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
 
   $scope.loginData = {};
   console.log(localstorage.get("clientId"));
+  Parse.initialize("ICChql4X4IPaEOxle6RRG0t16WnMT7Ej5oyPCMYJ",
+  "RCG89Kd4WLx4twwzivinAi3vNDKr951GPHlh98DD");
   if (localstorage.get("clientId") !== undefined && localstorage.get("clientId") !== "") {
     //Login
     $state.go("app.QRScanner");
+    // Parse.Cloud.run('pushToUser', {
+    //   recipientId: "9a78925b-e403-41e3-a1c4-b0343bc68ce8",
+    //   message: "this is from a client"
+    // }, {
+    //   success: function(response) {
+    //     console.log(response);
+    //   },
+    //   error: function(error) {
+    //     console.log(error);
+    //   }
+    // });
   }
 
   $scope.login = function() {
@@ -25,14 +38,21 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
         if (response.status === "True") {
           localstorage.set("clientId",response.clientId);
           $ionicHistory.nextViewOptions({
-              disableBack: true
+            disableBack: true
           });
           $state.go("app.QRScanner");
         } else {
-          $ionicPopup.alert({
-            title: 'Something went wrong',
-            template: 'We\'re not quite sure what, but could you check your internet is on?'
-          });
+          if (response.message == undefined) {
+            $ionicPopup.alert({
+              title: 'Something went wrong',
+              template: 'We\'re not quite sure what, but could you check your internet is on?'
+            });
+          } else {
+            $ionicPopup.alert({
+              title: 'Something went wrong',
+              template: response.message
+            });
+          }
         }
       }, function(error) {
         $ionicLoading.hide();
