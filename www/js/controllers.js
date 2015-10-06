@@ -9,17 +9,6 @@ qrScanner.controller('loginCtrl', function($scope,$state, $ionicPopup, $timeout,
   if (localstorage.get("clientId") !== undefined && localstorage.get("clientId") !== "") {
     //Login
     $state.go("app.QRScanner");
-    // Parse.Cloud.run('pushToUser', {
-    //   recipientId: "9a78925b-e403-41e3-a1c4-b0343bc68ce8",
-    //   message: "this is from a client"
-    // }, {
-    //   success: function(response) {
-    //     console.log(response);
-    //   },
-    //   error: function(error) {
-    //     console.log(error);
-    //   }
-    // });
   }
 
   $scope.login = function() {
@@ -193,6 +182,17 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
         $scope.rewards.loyaltyPoints = response.loyaltyPoints;
         $scope.rewards.offerText = response.offerText;
         $scope.rewards.recommended = response.recommended;
+        Parse.Cloud.run('pushToUser', {
+          recipientId: userId,
+          message: "You\'ve redeemed: " + response.offerText + ", awesome."
+        }, {
+          success: function(response) {
+            console.log(response);
+          },
+          error: function(error) {
+            console.log(error);
+          }
+        });
       } else {
         if (response.message !== undefined) {
           $ionicPopup.alert({
