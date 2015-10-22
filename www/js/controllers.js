@@ -174,25 +174,45 @@ qrScanner.controller("QRController", function($scope,$filter,$ionicPlatform, $co
       $scope.rewards = {};
       $ionicLoading.hide();
       if (response.status === "True") {
-        $ionicPopup.alert({
-          title: 'Offer claimed',
-          template: 'Claimed offer: ' + response.offerText
-        });
+        if (response.message !== undefined) {
+          //Repeat user
+          $ionicPopup.alert({
+            title: 'Offer claimed',
+            template: 'New user! Claimed offer: ' + response.offerText
+          });
+          Parse.Cloud.run('pushToUser', {
+            recipientId: userId,
+            message: "You\'ve redeemed: " + response.offerText + ", + 5 points. New restaurant bonus + 8 points. Awesome!"
+          }, {
+            success: function(response) {
+              console.log(response);
+            },
+            error: function(error) {
+              console.log(error);
+            }
+          });
+        } else {
+          //New user
+          $ionicPopup.alert({
+            title: 'Offer claimed',
+            template: 'Claimed offer: ' + response.offerText
+          });
+          Parse.Cloud.run('pushToUser', {
+            recipientId: userId,
+            message: "You\'ve redeemed: " + response.offerText + ", + 5 points."
+          }, {
+            success: function(response) {
+              console.log(response);
+            },
+            error: function(error) {
+              console.log(error);
+            }
+          });
+        }
         $scope.rewards.loyaltyRedeemedLevel = "None";
         $scope.rewards.loyaltyPoints = response.loyaltyPoints;
         $scope.rewards.offerText = response.offerText;
         $scope.rewards.recommended = response.recommended;
-        Parse.Cloud.run('pushToUser', {
-          recipientId: userId,
-          message: "You\'ve redeemed: " + response.offerText + ", awesome."
-        }, {
-          success: function(response) {
-            console.log(response);
-          },
-          error: function(error) {
-            console.log(error);
-          }
-        });
       } else {
         if (response.message !== undefined) {
           $ionicPopup.alert({

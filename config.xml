@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.uq.yapnak.clientscanner" version="0.0.1">
+<widget id="com.uq.yapnak.clientscanner" version="0.0.2">
     <name>Yapnak Client</name>
     <description>
         The complimentary app for Yapnak Clients
